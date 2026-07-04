@@ -1,0 +1,10 @@
+{
+  "name": "real-estate-price-predictor-capstone",
+  "version": "1.0.0",
+  "description": "Capstone Project - Real Estate Price Prediction System (production ML system)",
+  "scripts": {
+    "docs:serve": "echo 'Static docs served from /docs — open docs/index.md'",
+    "lint:md": "echo 'Markdown lint placeholder for CI pipeline'"
+  },
+  "license": "MIT"
+}
