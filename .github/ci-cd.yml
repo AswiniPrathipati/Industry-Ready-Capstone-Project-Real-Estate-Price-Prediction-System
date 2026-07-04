@@ -1,0 +1,87 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test & Coverage
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate training data
+        run: python ml-pipeline/data/generate_data.py
+
+      - name: Train models (produces registry artifact used by quality gate + API tests)
+        run: python ml-pipeline/training/train_models.py
+
+      - name: Run test suite with coverage
+        run: pytest tests/ -v --cov=backend --cov-report=term-missing --cov-report=xml --cov-fail-under=80
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+
+  model-quality-gate:
+    name: Model Quality Gate
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install -r requirements.txt
+      - run: python ml-pipeline/data/generate_data.py
+      - run: python ml-pipeline/training/train_models.py
+      - name: Enforce R2 / MAPE acceptance thresholds
+        run: pytest tests/test_model_performance.py -v
+
+  build-and-push:
+    name: Build & Push Docker Images
+    needs: [test, model-quality-gate]
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build backend image
+        run: docker build -f infrastructure/docker/Dockerfile.backend -t real-estate-backend:${{ github.sha }} .
+
+      - name: Build frontend image
+        run: docker build -f infrastructure/docker/Dockerfile.frontend -t real-estate-frontend:${{ github.sha }} .
+
+      # In a real deployment this step pushes to a container registry
+      # (ECR/GCR/Docker Hub) using stored credentials as GitHub Secrets.
+      - name: (Placeholder) Push images to registry
+        run: echo "docker push <registry>/real-estate-backend:${{ github.sha }}"
+
+  deploy:
+    name: Deploy to Production
+    needs: build-and-push
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+      # In a real deployment this applies the Kubernetes manifests or
+      # triggers a managed-platform deploy (e.g. `kubectl apply -f infrastructure/kubernetes/`)
+      - name: (Placeholder) Apply Kubernetes manifests
+        run: echo "kubectl apply -f infrastructure/kubernetes/"
+      - name: (Placeholder) Hot-reload production model
+        run: echo "curl -X POST https://api.example.com/api/v1/reload-model"
