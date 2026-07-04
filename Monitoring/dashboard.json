@@ -1,0 +1,27 @@
+{
+  "title": "Real Estate Price Predictor - Production Dashboard",
+  "panels": [
+    {
+      "title": "Request Rate (req/s)",
+      "type": "graph",
+      "targets": [{ "expr": "rate(http_requests_total[1m])" }]
+    },
+    {
+      "title": "P95 Latency (s)",
+      "type": "graph",
+      "targets": [{ "expr": "histogram_quantile(0.95, rate(http_request_latency_seconds_bucket[5m]))" }]
+    },
+    {
+      "title": "Error Rate (5xx)",
+      "type": "graph",
+      "targets": [{ "expr": "rate(http_requests_total{status=~\"5..\"}[5m])" }]
+    },
+    {
+      "title": "Predictions Served",
+      "type": "stat",
+      "targets": [{ "expr": "sum(http_requests_total{endpoint=\"/api/v1/predict\"})" }]
+    }
+  ],
+  "schemaVersion": 36,
+  "version": 1
+}

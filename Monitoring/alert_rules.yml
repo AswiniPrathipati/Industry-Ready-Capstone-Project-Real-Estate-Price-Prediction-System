@@ -1,0 +1,38 @@
+groups:
+  - name: real-estate-api-alerts
+    rules:
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[5m]) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Error rate above 5% for the last 5 minutes"
+          description: "The real-estate prediction API is returning 5xx errors above the acceptable threshold."
+
+      - alert: HighLatency
+        expr: histogram_quantile(0.95, rate(http_request_latency_seconds_bucket[5m])) > 0.5
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "P95 latency above 500ms"
+          description: "95th percentile request latency has exceeded the 500ms SLA target."
+
+      - alert: ServiceDown
+        expr: up{job="real-estate-backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Backend service is unreachable"
+          description: "Prometheus cannot scrape the real-estate-backend target."
+
+      - alert: ModelNotLoaded
+        expr: real_estate_model_loaded == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Production model failed to load"
+          description: "The prediction service reports no active model in memory."
