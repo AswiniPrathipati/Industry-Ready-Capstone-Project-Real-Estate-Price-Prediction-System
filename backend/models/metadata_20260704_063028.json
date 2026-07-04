@@ -1,0 +1,49 @@
+{
+  "version": "20260704_063028",
+  "best_model": "ensemble",
+  "metrics": {
+    "ridge": {
+      "mae": 1104287.465564355,
+      "mape": 0.12093981125837194,
+      "r2": 0.9187570867956418,
+      "train_time_sec": 0.02
+    },
+    "random_forest": {
+      "mae": 814947.4299593155,
+      "mape": 0.0834172476443733,
+      "r2": 0.9692507553730894,
+      "train_time_sec": 5.51
+    },
+    "gradient_boosting": {
+      "mae": 624145.5924189572,
+      "mape": 0.06343133492756532,
+      "r2": 0.981389574724465,
+      "train_time_sec": 2.83
+    },
+    "xgboost": {
+      "mae": 639027.4659854167,
+      "mape": 0.06391138877198159,
+      "r2": 0.9800901926614762,
+      "train_time_sec": 0.43
+    },
+    "ensemble": {
+      "mae": 614137.8981494744,
+      "mape": 0.061774947335342556,
+      "r2": 0.9820211615841716
+    }
+  },
+  "feature_columns": [
+    "area",
+    "bedrooms",
+    "bathrooms",
+    "age",
+    "location",
+    "property_type",
+    "floor",
+    "facing",
+    "amenities_score"
+  ],
+  "trained_at": "2026-07-04T06:30:28.416501",
+  "training_rows": 4800,
+  "validation_rows": 1200
+}
